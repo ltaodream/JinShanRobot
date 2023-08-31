@@ -6,7 +6,7 @@ package main
 import bot "github.com/ltaodream/JinShanRobot"
 
 func main() {
-	bot := bot.NewBot("your_webhook_url")
+	bot := bot.NewBot("your_webhook_url", 500, 3)
 	err := bot.SendText("Hello, World!")
 	if err != nil {
 		return
