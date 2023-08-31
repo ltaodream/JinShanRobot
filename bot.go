@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 type Bot struct {
 	WebhookURL string
+	Timeout    int //毫秒
+	Retry      int
 }
 
 type Message struct {
@@ -17,8 +20,8 @@ type Message struct {
 	Link     interface{} `json:"link,omitempty"`
 }
 
-func NewBot(webhookURL string) *Bot {
-	return &Bot{WebhookURL: webhookURL}
+func NewBot(webhookURL string, timeout int, retry int) *Bot {
+	return &Bot{WebhookURL: webhookURL, Timeout: timeout, Retry: retry}
 }
 
 func (b *Bot) SendText(content string) error {
@@ -56,11 +59,18 @@ func (b *Bot) send(msg Message) error {
 		return err
 	}
 
-	resp, err := http.Post(b.WebhookURL, "application/json", bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	client := &http.Client{Timeout: time.Duration(b.Timeout) * time.Millisecond}
 
-	return nil
+	for i := 0; i < b.Retry; i++ {
+		resp, err := client.Post(b.WebhookURL, "application/json", bytes.NewBuffer(data))
+		if err != nil {
+			continue
+		}
+		resp.Body.Close()
+		if resp.StatusCode == http.StatusOK {
+			return nil
+		}
+	}
+
+	return err
 }
