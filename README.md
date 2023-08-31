@@ -7,8 +7,17 @@ import bot "github.com/ltaodream/JinShanRobot"
 
 func main() {
 	bot := bot.NewBot("your_webhook_url")
-	bot.SendText("Hello, World!")
-	bot.SendMarkdown("## Hello, World!")
-	bot.SendLink("Title", "Text", "https://kdocs.cn", "查看详情")
+	err := bot.SendText("Hello, World!")
+	if err != nil {
+		return
+	}
+	err = bot.SendMarkdown("## Hello, World!")
+	if err != nil {
+		return
+	}
+	err = bot.SendLink("Title", "Text", "https://kdocs.cn", "查看详情")
+	if err != nil {
+		return
+	}
 }
 ```
